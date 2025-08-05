@@ -1,36 +1,152 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BJJ Video Library Dashboard
 
-## Getting Started
+A Next.js dashboard for browsing and searching Brazilian Jiu-Jitsu videos with MongoDB integration.
 
-First, run the development server:
+## Features
+
+- 🔍 **Smart Search** - Search through videos, notes, and hashtags with autocomplete suggestions
+- 🏷️ **Hashtag Filtering** - Click on hashtags to filter videos instantly
+- 📄 **Pagination** - Smooth pagination through large datasets
+- 🎬 **Video Cards** - Beautiful video cards with thumbnails, hashtags, and metadata
+- 📱 **Responsive Design** - Works perfectly on all device sizes
+- 🌙 **Dark/Light Mode** - Built-in theme support with ShadCN
+- ⚡ **Fast Performance** - Optimized MongoDB queries and caching
+
+## Tech Stack
+
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Styling**: Tailwind CSS, ShadCN UI
+- **Database**: MongoDB Atlas
+- **Icons**: Lucide React
+
+## Setup Instructions
+
+### 1. Install Dependencies
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Database Configuration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Your MongoDB connection is already configured in `/lib/mongodb.ts`:
+- **URI**: `mongodb+srv://furniture2023:testing1111@bjj.unjbknu.mongodb.net/`
+- **Database**: `BJJ`
+- **Collection**: `videos`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Sync Your Data
 
-## Learn More
+First, sync your data from the API to MongoDB:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# Go back to the root directory
+cd ..
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Install sync script dependencies
+npm install
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Run the sync
+npm run sync
+```
 
-## Deploy on Vercel
+This will fetch the latest data from your API and populate MongoDB.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 4. Start the Development Server
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+# Back to the outlier directory
+cd outlier
+npm run dev
+```
+
+Visit [http://localhost:3000](http://localhost:3000) to see your dashboard!
+
+## API Routes
+
+- **`/api/videos`** - Fetch videos with pagination and filters
+  - Query params: `page`, `limit`, `search`, `hashtag`, `isResource`
+- **`/api/search-suggestions`** - Get search autocomplete suggestions
+  - Query params: `q` (search query)
+- **`/api/hashtags`** - Get all unique hashtags with counts
+
+## Search Features
+
+### Smart Search
+- Search through video notes and hashtags
+- Real-time autocomplete suggestions
+- Pill-style hashtag suggestions with counts
+
+### Filtering
+- **Resources vs Footage** - Toggle between instructional content and raw footage
+- **Hashtag Filters** - Click any hashtag to filter videos
+- **Search + Filters** - Combine search with filters for precise results
+
+### Keyboard Navigation
+- Use arrow keys to navigate suggestions
+- Press Enter to select
+- ESC to close suggestions
+
+## Data Structure
+
+Your videos contain these fields:
+```typescript
+{
+  _id: string;
+  videoURL: string;
+  startingTimestamp: number;
+  note: string;
+  hashtags: { _id: string; tag: string }[];
+  isResource: boolean;
+  updatedAt: string;
+  trendingScore: number;
+}
+```
+
+## Key Components
+
+- **`SearchBar`** - Smart search with autocomplete (`/components/search-bar.tsx`)
+- **`VideoCard`** - Beautiful video cards with thumbnails (`/components/video-card.tsx`)
+- **`Pagination`** - Smooth pagination component (`/components/pagination.tsx`)
+- **Dashboard** - Main page bringing everything together (`/app/dashboard/page.tsx`)
+
+## Customization
+
+### Styling
+- Modify `/app/globals.css` for global styles
+- Components use ShadCN variants for consistent theming
+- Tailwind classes for responsive design
+
+### Search Logic
+- Customize search suggestions in `/app/api/search-suggestions/route.ts`
+- Modify video fetching logic in `/app/api/videos/route.ts`
+
+### Video Cards
+- Thumbnail generation from YouTube URLs
+- Hashtag pill interactions
+- Timestamp overlays for video segments
+
+## Performance Tips
+
+1. **MongoDB Indexes**: Add indexes for better search performance:
+   ```javascript
+   // Create text index for search
+   db.videos.createIndex({ "note": "text", "hashtags.tag": "text" })
+   
+   // Create compound indexes for filtering
+   db.videos.createIndex({ "hashtags.tag": 1 })
+   db.videos.createIndex({ "isResource": 1, "trendingScore": -1 })
+   ```
+
+2. **Pagination**: Uses skip/limit for efficient pagination
+3. **Caching**: MongoDB connection caching for better performance
+
+## Updating Data
+
+To update your video database with the latest content:
+
+```bash
+# From the root directory
+npm run sync
+```
+
+This will fetch fresh data from your API and update MongoDB automatically.
