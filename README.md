@@ -27,12 +27,18 @@ A Next.js dashboard for browsing and searching Brazilian Jiu-Jitsu videos with M
 npm install
 ```
 
-### 2. Database Configuration
+### 2. Environment Setup
 
-Your MongoDB connection is already configured in `/lib/mongodb.ts`:
-- **URI**: `mongodb+srv://furniture2023:testing1111@bjj.unjbknu.mongodb.net/`
-- **Database**: `BJJ`
-- **Collection**: `videos`
+Create a `.env.local` file in the root directory:
+
+```env
+MONGODB_URI=mongodb+srv://furniture2023:testing1111@bjj.unjbknu.mongodb.net/?retryWrites=true&w=majority&appName=BJJ
+DATABASE_NAME=BJJ
+```
+
+**For Vercel deployment**, add these environment variables in your Vercel dashboard:
+- `MONGODB_URI` = Your MongoDB connection string
+- `DATABASE_NAME` = Your database name
 
 ### 3. Sync Your Data
 
@@ -58,6 +64,8 @@ This will fetch the latest data from your API and populate MongoDB.
 cd outlier
 npm run dev
 ```
+
+**Note**: The `.env.local` file is already created with your MongoDB credentials and is ignored by git for security.
 
 Visit [http://localhost:3000](http://localhost:3000) to see your dashboard!
 

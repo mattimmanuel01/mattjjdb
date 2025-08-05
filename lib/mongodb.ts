@@ -1,10 +1,14 @@
 import { MongoClient, Db } from 'mongodb';
 
-const MONGODB_URI = "mongodb+srv://furniture2023:testing1111@bjj.unjbknu.mongodb.net/?retryWrites=true&w=majority&appName=BJJ";
-const DATABASE_NAME = "BJJ";
+const MONGODB_URI = process.env.MONGODB_URI;
+const DATABASE_NAME = process.env.DATABASE_NAME;
 
 if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable');
+  throw new Error('Please define the MONGODB_URI environment variable in .env.local');
+}
+
+if (!DATABASE_NAME) {
+  throw new Error('Please define the DATABASE_NAME environment variable in .env.local');
 }
 
 let cachedClient: MongoClient | null = null;

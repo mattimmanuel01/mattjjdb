@@ -1,13 +1,14 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { SearchBar } from '@/components/search-bar';
-import { VideoCard } from '@/components/video-card';
-import { Pagination } from '@/components/pagination';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Video } from '@/lib/mongodb';
-import { Filter, X, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { SearchBar } from "@/components/search-bar";
+import { VideoCard } from "@/components/video-card";
+import { VideoModal } from "@/components/video-modal";
+import { Pagination } from "@/components/pagination";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Video } from "@/lib/mongodb";
+import { Filter, X, Loader2 } from "lucide-react";
 
 interface PaginationData {
   page: number;
@@ -28,16 +29,18 @@ export default function DashboardPage() {
     page: 1,
     limit: 12,
     total: 0,
-    pages: 0
+    pages: 0,
   });
-  
+
   const [filters, setFilters] = useState({
-    search: '',
-    hashtag: '',
+    search: "",
+    hashtag: "",
     isResource: null as boolean | null,
   });
 
   const [selectedHashtags, setSelectedHashtags] = useState<string[]>([]);
+  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchVideos();
@@ -51,70 +54,84 @@ export default function DashboardPage() {
         limit: pagination.limit.toString(),
       });
 
-      if (filters.search) params.append('search', filters.search);
-      if (filters.hashtag) params.append('hashtag', filters.hashtag);
-      if (filters.isResource !== null) params.append('isResource', filters.isResource.toString());
+      if (filters.search) params.append("search", filters.search);
+      if (filters.hashtag) params.append("hashtag", filters.hashtag);
+      if (filters.isResource !== null)
+        params.append("isResource", filters.isResource.toString());
 
       const response = await fetch(`/api/videos?${params}`);
       const data: VideoResponse = await response.json();
-      
+
       setVideos(data.videos);
       setPagination(data.pagination);
     } catch (error) {
-      console.error('Failed to fetch videos:', error);
+      console.error("Failed to fetch videos:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSearch = (query: string) => {
-    setFilters(prev => ({ ...prev, search: query }));
-    setPagination(prev => ({ ...prev, page: 1 }));
+    setFilters((prev) => ({ ...prev, search: query }));
+    setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
   const handleHashtagSelect = (hashtag: string) => {
-    setFilters(prev => ({ ...prev, hashtag }));
-    setPagination(prev => ({ ...prev, page: 1 }));
-    
+    setFilters((prev) => ({ ...prev, hashtag }));
+    setPagination((prev) => ({ ...prev, page: 1 }));
+
     if (!selectedHashtags.includes(hashtag)) {
-      setSelectedHashtags(prev => [...prev, hashtag]);
+      setSelectedHashtags((prev) => [...prev, hashtag]);
     }
   };
 
   const removeHashtagFilter = (hashtagToRemove: string) => {
-    setSelectedHashtags(prev => prev.filter(tag => tag !== hashtagToRemove));
+    setSelectedHashtags((prev) =>
+      prev.filter((tag) => tag !== hashtagToRemove)
+    );
     if (filters.hashtag === hashtagToRemove) {
-      setFilters(prev => ({ ...prev, hashtag: '' }));
-      setPagination(prev => ({ ...prev, page: 1 }));
+      setFilters((prev) => ({ ...prev, hashtag: "" }));
+      setPagination((prev) => ({ ...prev, page: 1 }));
     }
   };
 
   const handleResourceFilter = (isResource: boolean | null) => {
-    setFilters(prev => ({ ...prev, isResource }));
-    setPagination(prev => ({ ...prev, page: 1 }));
+    setFilters((prev) => ({ ...prev, isResource }));
+    setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
   const handlePageChange = (page: number) => {
-    setPagination(prev => ({ ...prev, page }));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setPagination((prev) => ({ ...prev, page }));
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const clearAllFilters = () => {
-    setFilters({ search: '', hashtag: '', isResource: null });
+    setFilters({ search: "", hashtag: "", isResource: null });
     setSelectedHashtags([]);
-    setPagination(prev => ({ ...prev, page: 1 }));
+    setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
-  const hasActiveFilters = filters.search || filters.hashtag || filters.isResource !== null;
+  const handleVideoClick = (video: Video) => {
+    setSelectedVideo(video);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedVideo(null);
+  };
+
+  const hasActiveFilters =
+    filters.search || filters.hashtag || filters.isResource !== null;
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2">BJJ Video Library</h1>
+          <h1 className="text-4xl font-bold mb-2">Matty Jits 🥋🥋</h1>
           <p className="text-muted-foreground text-lg">
-            Discover and explore Brazilian Jiu-Jitsu techniques and concepts
+            Discover and explore trending BJJ techniques and concepts
           </p>
         </div>
 
@@ -135,9 +152,17 @@ export default function DashboardPage() {
           </div>
 
           <Button
-            variant={filters.isResource === null ? "outline" : filters.isResource ? "default" : "outline"}
+            variant={
+              filters.isResource === null
+                ? "outline"
+                : filters.isResource
+                ? "default"
+                : "outline"
+            }
             size="sm"
-            onClick={() => handleResourceFilter(filters.isResource === true ? null : true)}
+            onClick={() =>
+              handleResourceFilter(filters.isResource === true ? null : true)
+            }
           >
             Resources
           </Button>
@@ -145,7 +170,9 @@ export default function DashboardPage() {
           <Button
             variant={filters.isResource === false ? "default" : "outline"}
             size="sm"
-            onClick={() => handleResourceFilter(filters.isResource === false ? null : false)}
+            onClick={() =>
+              handleResourceFilter(filters.isResource === false ? null : false)
+            }
           >
             Footage
           </Button>
@@ -186,7 +213,9 @@ export default function DashboardPage() {
         {loading && (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin" />
-            <span className="ml-2 text-muted-foreground">Loading videos...</span>
+            <span className="ml-2 text-muted-foreground">
+              Loading videos...
+            </span>
           </div>
         )}
 
@@ -199,6 +228,7 @@ export default function DashboardPage() {
                   key={video._id}
                   video={video}
                   onHashtagClick={handleHashtagSelect}
+                  onVideoClick={handleVideoClick}
                 />
               ))}
             </div>
@@ -206,7 +236,9 @@ export default function DashboardPage() {
             {/* Results info */}
             <div className="text-center mb-6">
               <p className="text-sm text-muted-foreground">
-                Showing {((pagination.page - 1) * pagination.limit) + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} videos
+                Showing {(pagination.page - 1) * pagination.limit + 1}-
+                {Math.min(pagination.page * pagination.limit, pagination.total)}{" "}
+                of {pagination.total} videos
               </p>
             </div>
 
@@ -224,7 +256,9 @@ export default function DashboardPage() {
         {/* Empty state */}
         {!loading && videos.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-lg text-muted-foreground mb-2">No videos found</p>
+            <p className="text-lg text-muted-foreground mb-2">
+              No videos found
+            </p>
             <p className="text-sm text-muted-foreground">
               Try adjusting your search terms or filters
             </p>
@@ -240,6 +274,14 @@ export default function DashboardPage() {
             )}
           </div>
         )}
+
+        {/* Video Modal */}
+        <VideoModal
+          video={selectedVideo}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onHashtagClick={handleHashtagSelect}
+        />
       </div>
     </div>
   );
