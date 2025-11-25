@@ -1,4 +1,4 @@
-# BJJ Video Library Dashboard
+# BJJ Video Library Dashboard 
 
 A Next.js dashboard for browsing and searching Brazilian Jiu-Jitsu videos with MongoDB integration.
 
