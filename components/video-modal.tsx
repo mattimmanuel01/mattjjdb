@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, TrendingUp, ExternalLink, Calendar } from 'lucide-react';
 import { Video } from '@/lib/mongodb';
+import { SharePopover } from '@/components/share-popover';
 
 interface VideoModalProps {
   video: Video | null;
@@ -70,6 +71,7 @@ export function VideoModal({ video, isOpen, onClose, onHashtagClick }: VideoModa
     const startTime = video.startingTimestamp > 0 ? `&t=${video.startingTimestamp}s` : '';
     window.open(`${video.videoURL}${startTime}`, '_blank');
   };
+
 
   const handleHashtagClick = (hashtag: string) => {
     onHashtagClick(hashtag);
@@ -136,7 +138,7 @@ export function VideoModal({ video, isOpen, onClose, onHashtagClick }: VideoModa
                 className="text-xs bg-background/90 flex items-center gap-1"
               >
                 <TrendingUp className="h-3 w-3" />
-                {video.trendingScore.toFixed(1)}
+                {video.trendingScore?.toFixed(1) ?? '0.0'}
               </Badge>
             </div>
           </div>
@@ -180,15 +182,18 @@ export function VideoModal({ video, isOpen, onClose, onHashtagClick }: VideoModa
                   <div className="text-xs text-muted-foreground">
                     Updated {formatDate(video.updatedAt)}
                   </div>
-                  <Button
-                    onClick={handleExternalLink}
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs"
-                  >
-                    <ExternalLink className="h-3 w-3 mr-1" />
-                    YouTube
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <SharePopover video={video} />
+                    <Button
+                      onClick={handleExternalLink}
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs"
+                    >
+                      <ExternalLink className="h-3 w-3 mr-1" />
+                      YouTube
+                    </Button>
+                  </div>
                 </div>
               </div>
             </>

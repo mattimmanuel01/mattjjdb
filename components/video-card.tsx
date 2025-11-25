@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Play, ExternalLink, Clock, TrendingUp, X } from "lucide-react";
 import { Video } from "@/lib/mongodb";
+import { SharePopover } from "@/components/share-popover";
 
 interface VideoCardProps {
   video: Video;
@@ -85,6 +86,7 @@ export function VideoCard({ video, onHashtagClick, onVideoClick }: VideoCardProp
       video.startingTimestamp > 0 ? `&t=${video.startingTimestamp}s` : "";
     window.open(`${video.videoURL}${startTime}`, "_blank");
   };
+
 
   const thumbnailUrl = getThumbnailUrl(video.videoURL);
   const embedUrl = getEmbedUrl(video.videoURL, video.startingTimestamp);
@@ -171,7 +173,7 @@ export function VideoCard({ video, onHashtagClick, onVideoClick }: VideoCardProp
               className="text-xs bg-background/90 flex items-center gap-1"
             >
               <TrendingUp className="h-3 w-3" />
-              {video.trendingScore.toFixed(1)}
+              {video.trendingScore?.toFixed(1) ?? '0.0'}
             </Badge>
           </div>
         )}
@@ -215,15 +217,18 @@ export function VideoCard({ video, onHashtagClick, onVideoClick }: VideoCardProp
         <div className="text-xs text-muted-foreground">
           Updated {formatDate(video.updatedAt)}
         </div>
-        <Button
-          onClick={handleExternalClick}
-          variant="ghost"
-          size="sm"
-          className="text-xs"
-        >
-          <ExternalLink className="h-3 w-3 mr-1" />
-          YouTube
-        </Button>
+        <div className="flex items-center gap-1">
+          <SharePopover video={video} />
+          <Button
+            onClick={handleExternalClick}
+            variant="ghost"
+            size="sm"
+            className="text-xs"
+          >
+            <ExternalLink className="h-3 w-3 mr-1" />
+            YouTube
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );
