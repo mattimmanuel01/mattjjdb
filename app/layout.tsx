@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Matty Jits",
-  description: "Oss 🥋",
+  title: "Matty Jits | BJJ Technique Database",
+  description: "A full-stack platform for discovering and exploring BJJ techniques, powered by Next.js, MongoDB, and ML-driven trend analysis.",
 };
 
 export default function RootLayout({

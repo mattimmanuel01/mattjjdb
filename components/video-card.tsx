@@ -179,7 +179,7 @@ export function VideoCard({ video, onHashtagClick, onVideoClick }: VideoCardProp
         )}
       </div>
 
-      <CardContent className="p-4">
+      <CardContent className="p-4 flex-1">
         <div className="space-y-3">
           <div className="text-sm text-muted-foreground leading-relaxed">
             <p className={isNoteExpanded ? "" : "line-clamp-3"}>
@@ -196,7 +196,7 @@ export function VideoCard({ video, onHashtagClick, onVideoClick }: VideoCardProp
           </div>
 
           <div className="flex flex-wrap gap-1">
-            {video.hashtags.map((hashtag) => (
+            {video.hashtags.slice(0, 6).map((hashtag) => (
               <Badge
                 key={hashtag._id}
                 variant="secondary"
@@ -209,11 +209,16 @@ export function VideoCard({ video, onHashtagClick, onVideoClick }: VideoCardProp
                 {hashtag.tag}
               </Badge>
             ))}
+            {video.hashtags.length > 6 && (
+              <Badge variant="outline" className="text-xs">
+                +{video.hashtags.length - 6}
+              </Badge>
+            )}
           </div>
         </div>
       </CardContent>
 
-      <CardFooter className="p-4 pt-0 flex items-center justify-between">
+      <CardFooter className="p-4 pt-0 flex items-center justify-between mt-auto">
         <div className="text-xs text-muted-foreground">
           Updated {formatDate(video.updatedAt)}
         </div>
